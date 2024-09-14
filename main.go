@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -9,36 +8,35 @@ import (
 	"os"
 )
 
-var (
-	listen = flag.Bool("l", false, "Listen")
-	host   = flag.String("h", "localhost", "Host")
-	port   = flag.Int("p", 0, "Port")
+const (
+	HOST = "localhost"
+	PORT = "8080"
+	TYPE = "tcp"
 )
 
 func main() {
 	// parse flags
-	flag.Parse()
 	// launch server
-	if *listen {
-		startServer()
-		return
-	}
-	if len(flag.Args()) < 2 {
-		fmt.Println("Hostname and port required")
-		return
-	}
-	serverHost := flag.Arg(0)
-	serverPort := flag.Arg(1)
-	startClient(fmt.Sprintf("%s:%s", serverHost, serverPort))
+	//	if *listen {
+	startServer()
+	return
+	//	}
+	// if len(flag.Args()) < 2 {
+	// 	fmt.Println("Hostname and port required")
+	// 	return
+	// }
+	// serverHost := flag.Arg(0)
+	// serverPort := flag.Arg(1)
+	startClient(fmt.Sprintf("%s:%s", HOST, PORT))
 }
 
 func startServer() {
 	// donc addr is server's address
-	addr := fmt.Sprintf("%s:%d", *host, *port)
+	// addr := fmt.Sprintf("%s:%d", *host, *port)******************
 	// launch TCP server
 	// func net.Listen  It is used to create a network listener that waits for incoming connections on a specified network address and port
 	// net.Listen("tcp" the network type , addr the address and port to listen on)
-	listener, err := net.Listen("tcp", addr)
+	listener, err := net.Listen(TYPE, HOST+":"+PORT)
 	if err != nil {
 		// if we can't launch server for some reason,
 		panic(err)
@@ -71,5 +69,14 @@ func processClient(conn net.Conn) {
 }
 
 func startClient(addr string) {
-	//net.Dial  
+	// net.Dial connect to a TCP server running on localhost at port 1234. (use for connect with our server)
+	conn, err := net.Dial("tcp", addr)
+	if err != nil {
+		fmt.Printf("Can't connect to server: %s\n", err)
+		return
+	}
+	_, err = io.Copy(conn, os.Stdin)
+	if err != nil {
+		fmt.Printf("Connection error: %s\n", err)
+	}
 }
