@@ -16,8 +16,6 @@ const (
 
 var clients = make(map[net.Conn]string)
 
-var msg string
-
 func main() {
 	startServer()
 }
@@ -32,28 +30,36 @@ func startServer() {
 		if err != nil {
 			log.Printf("Error accepting connection from client: %s", err)
 		}
-		conn.Write([]byte("Welcome to TCP-Chat!\n"))
-		conn.Write([]byte("Enter your name:"))
-		read := bufio.NewReader(conn)
-		name, _ := read.ReadString('\n')
-		name = strings.TrimSpace(name)
-		clients[conn] = name
-		go BrodCast(conn)
+		go Connection(conn)
 	}
 }
 
-func BrodCast(conn net.Conn) {
-	for {
-		for client, name := range clients {
-			reder := bufio.NewReader(client)
-			if client != conn {
-				currentTime := time.Now().Format(time.DateTime)
-				client.Write([]byte("\n" + "[" + currentTime + "]" + "[" + clients[conn] + "]:" + msg))
-			} else {
-				currentTime := time.Now().Format("2006-01-02 15:04:05")
-				client.Write([]byte("\n" + "[" + currentTime + "]" + "[" + string(name) + "]:"))
-				msg, _ = reder.ReadString('\n')
-			}
+func BrodCast(msg string, conn net.Conn) {
+	for client, name := range clients {
+		// fmt.Println(client, name)
+		if client != conn {
+			client.Write([]byte(msg))
 		}
+		currentTime := time.Now().Format(time.DateTime)
+		client.Write([]byte("[" + currentTime + "]" + "[" + name + "]:"))
+	}
+}
+
+func Connection(conn net.Conn) {
+	conn.Write([]byte("Welcome to TCP-Chat!\n"))
+	conn.Write([]byte("Enter your name:"))
+	currentTime := time.Now().Format(time.DateTime)
+	read := bufio.NewReader(conn)
+	name, _ := read.ReadString('\n')
+	name = strings.TrimSpace(name)
+	clients[conn] = name
+	BrodCast("\n"+clients[conn]+" has joined"+"\n", conn)
+	for {
+		msg, err := read.ReadString('\n')
+		if err != nil {
+			BrodCast("\n"+name+" has left\n", conn)
+			break
+		}
+		BrodCast("\n"+"["+currentTime+"]"+"["+clients[conn]+"]:"+msg, conn)
 	}
 }
