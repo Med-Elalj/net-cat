@@ -2,8 +2,10 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"net"
+	"os"
 	"strings"
 	"time"
 )
@@ -21,6 +23,7 @@ func main() {
 }
 
 func startServer() {
+	fmt.Println("Starting server at localhost 8080")
 	listener, err := net.Listen(TYPE, HOST+":"+PORT)
 	if err != nil {
 		panic(err)
@@ -36,7 +39,6 @@ func startServer() {
 
 func BrodCast(msg string, conn net.Conn) {
 	for client, name := range clients {
-		// fmt.Println(client, name)
 		if client != conn {
 			client.Write([]byte(msg))
 		}
@@ -46,19 +48,31 @@ func BrodCast(msg string, conn net.Conn) {
 }
 
 func Connection(conn net.Conn) {
-	conn.Write([]byte("Welcome to TCP-Chat!\n"))
-	conn.Write([]byte("Enter your name:"))
 	currentTime := time.Now().Format(time.DateTime)
+	conn.Write([]byte("Welcome to TCP-Chat!\n"))
+	file, _ := os.ReadFile("logo.txt")
+	conn.Write([]byte(file))
+	conn.Write([]byte("[ENTER YOUR NAME]: "))
 	read := bufio.NewReader(conn)
 	name, _ := read.ReadString('\n')
 	name = strings.TrimSpace(name)
 	clients[conn] = name
-	BrodCast("\n"+clients[conn]+" has joined"+"\n", conn)
+	BrodCast("\n"+clients[conn]+" has joined our chat..."+"\n", conn)
 	for {
 		msg, err := read.ReadString('\n')
+		if len(msg) == 0 {
+			fmt.Println("pooo")
+			continue
+		}
 		if err != nil {
-			BrodCast("\n"+name+" has left\n", conn)
+			BrodCast("\n"+name+" has left our chat...\n", conn)
 			break
+		}
+		
+		for i := 0; i < len(msg); i++ {
+			if string(msg[i]) == "^[[D" || string(msg[i]) == "^[[B" || string(msg[i]) == "^[[A" || string(msg[i]) == "^[[C" {
+				continue
+			}
 		}
 		BrodCast("\n"+"["+currentTime+"]"+"["+clients[conn]+"]:"+msg, conn)
 	}
