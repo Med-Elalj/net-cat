@@ -1,14 +1,18 @@
 package connection
 
 import (
-	"fmt"
 	"net"
 	"os"
+	"sync"
 )
 
 var (
 	Clients = make(map[net.Conn]string)
 	File    []byte
+	msgs    []string
+	mssags  string
+	// create a mutex by declaring a variable of type sync.Mutex
+	mu sync.Mutex
 )
 
 func isPrintable(s string) bool {
@@ -26,8 +30,7 @@ func Validname(connname string) bool {
 			return false
 		}
 	}
-	if len(connname) < 2 || !isPrintable(connname) {
-		fmt.Println("hhh")
+	if len(connname) == 0 || !isPrintable(connname) {
 		return false
 	}
 	return true
