@@ -20,17 +20,15 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	// PORT := connection.CheckPort()
 	if PORT == "invalid port" {
 		fmt.Println("invalid port")
 		return
 	}
 	listener, err := net.Listen(TYPE, ":"+PORT)
-	if err != nil || PORT < "1026" {
+	if err != nil || PORT < "1026" { //**********
 		fmt.Println("you cannot connected")
 		return
 	}
-
 	fmt.Println("Starting server at localhost " + PORT)
 	for {
 		conn, err := listener.Accept()

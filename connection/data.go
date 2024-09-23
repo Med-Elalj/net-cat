@@ -10,7 +10,6 @@ var (
 	Clients = make(map[net.Conn]string)
 	File    []byte
 	msgs    []string
-	mssags  string
 	// create a mutex by declaring a variable of type sync.Mutex
 	mu sync.Mutex
 )
@@ -36,7 +35,7 @@ func Validname(connname string) bool {
 	return true
 }
 
-func isnumeric(s string) bool {
+func Isnumeric(s string) bool {
 	for _, v := range s {
 		if v < 48 || v > 57 {
 			return false
@@ -48,7 +47,7 @@ func isnumeric(s string) bool {
 func CheckPort() string {
 	var PORT string
 	if len(os.Args) == 2 {
-		if !isnumeric(os.Args[1]) || len(os.Args[1]) > 5 {
+		if !Isnumeric(os.Args[1]) || len(os.Args[1]) > 5 {
 			return "invalid port"
 		}
 		PORT = os.Args[1]

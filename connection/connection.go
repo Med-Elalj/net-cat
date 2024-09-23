@@ -2,13 +2,13 @@ package connection
 
 import (
 	"bufio"
-	"fmt"
 	"net"
 	"strings"
 	"time"
 )
 
 func BrodCast(msg string, conn net.Conn) {
+	msgs = append(msgs, msg[:len(msg)-1])
 	currentTime := time.Now().Format(time.DateTime)
 	// lock the mutex before accessing the data
 	mu.Lock()
@@ -39,37 +39,36 @@ func Connection(conn net.Conn, File []byte) {
 		conn.Write([]byte("you cannot join the chat"))
 		return
 	}
-	BrodCast("\n"+Clients[conn]+" has joined our chat..."+"\n", conn)
-	if mssags != "" {
-		conn.Write([]byte(mssags + "\n"))
+	
+	if len(msgs) != 0 {
+		conn.Write([]byte(strings.Join(msgs, "") + "\n"))
 		conn.Write([]byte("[" + time.Now().Format(time.DateTime) + "][" + Clients[conn] + "]:"))
-		mssags = ""
+		// mssags = ""
 	}
+
+	BrodCast("\n"+Clients[conn]+" has joined our chat..."+"\n", conn)
+	// mssags += "\n" + Clients[conn] + " has joined our chat..."
 	for {
 		msg, err := read.ReadString('\n')
 		if err != nil {
 			BrodCast("\n"+name+" has left our chat...\n", conn)
 			break
 		}
-		fmt.Println("1",msg)
-		fmt.Println("2",len(msg))
-		fmt.Println("3",[]byte(msg))
-		fmt.Println("4",string(msg))
 		if len(msg) == 1 {
 			conn.Write([]byte("you can't enter in empty message\n"))
 			conn.Write([]byte("[" + time.Now().Format(time.DateTime) + "][" + Clients[conn] + "]:"))
 			continue
 		}
-		if !isPrintable(msg[:len(msg)-1]) { //****
+		if !isPrintable(msg[:len(msg)-1]) {
 			conn.Write([]byte("you just entered in invalid text\n"))
 			conn.Write([]byte("[" + time.Now().Format(time.DateTime) + "][" + Clients[conn] + "]:"))
 			continue
 		}
 		BrodCast("\n"+"["+time.Now().Format(time.DateTime)+"]"+"["+Clients[conn]+"]:"+msg, conn)
-		msg = strings.TrimSpace(msg)
-		msgs := append(msgs, "\n"+"["+time.Now().Format(time.DateTime)+"]"+"["+Clients[conn]+"]:"+msg)
-		for i := 0; i < len(msgs); i++ {
-			mssags += msgs[i]
-		}
+		// msg = strings.TrimSpace(msg)
+		// msgs = append(msgs, "\n"+"["+time.Now().Format(time.DateTime)+"]"+"["+Clients[conn]+"]:"+msg)
+		// for i := 0; i < len(msgs); i++ {
+		// 	mssags += msgs[i]
+		// }
 	}
 }
