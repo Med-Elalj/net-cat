@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"strconv"
 
 	"netcat/connection"
 )
@@ -25,8 +26,12 @@ func main() {
 		return
 	}
 	listener, err := net.Listen(TYPE, ":"+PORT)
-	if err != nil || PORT < "1026" { //**********
-		fmt.Println("you cannot connected")
+	if err != nil { //**********
+		fmt.Println("Error strating server :", err)
+		return
+	}
+	if i, _ := strconv.Atoi(PORT); i < 1026 { //**********
+		fmt.Println("Error strating server : Port needs to be bigger than 1026")
 		return
 	}
 	fmt.Println("Starting server at localhost " + PORT)
@@ -34,6 +39,7 @@ func main() {
 		conn, err := listener.Accept()
 		if err != nil {
 			log.Printf("Error accepting connection from client: %s", err)
+			conn.Close()
 			continue
 		}
 		go connection.Connection(conn, File)
