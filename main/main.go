@@ -13,21 +13,24 @@ const (
 	TYPE = "tcp"
 )
 
+var PORT string
+
 func main() {
 	File, err := os.ReadFile("../connection/logo.txt")
 	if err != nil {
 		panic(err)
 	}
-	PORT := connection.CheckPort()
+	// PORT := connection.CheckPort()
 	if PORT == "invalid port" {
 		fmt.Println("invalid port")
 		return
 	}
 	listener, err := net.Listen(TYPE, ":"+PORT)
-	if err != nil {
+	if err != nil || PORT < "1026" {
 		fmt.Println("you cannot connected")
 		return
 	}
+
 	fmt.Println("Starting server at localhost " + PORT)
 	for {
 		conn, err := listener.Accept()
@@ -36,5 +39,18 @@ func main() {
 			continue
 		}
 		go connection.Connection(conn, File)
+	}
+}
+
+func init() {
+	if len(os.Args) == 2 {
+		if !connection.Isnumeric(os.Args[1]) || len(os.Args[1]) > 5 {
+			PORT = "invalid port"
+		}
+		PORT = os.Args[1]
+	} else if len(os.Args) == 1 {
+		PORT = "8989"
+	} else {
+		PORT = ("invalid port")
 	}
 }
