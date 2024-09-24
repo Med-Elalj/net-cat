@@ -16,7 +16,7 @@ func BrodCast(msg string, conn net.Conn) {
 	defer mu.Unlock()
 	for client, name := range Clients {
 		if client != conn {
-			client.Write([]byte(msg))
+			client.Write([]byte("\n" + msg))
 		}
 		client.Write([]byte(fmt.Sprintf("[%s][%s]:", currentTime, name)))
 	}
@@ -46,16 +46,19 @@ func Connection(conn net.Conn, Logo []byte) {
 	mu.Lock()
 	Clients[conn] = name
 	mu.Unlock()
+	defer BrodCast(name+" has left our chat...\n", conn)
 	fmt.Println(len(Clients))
 	if len(msgs) != 0 {
-		conn.Write([]byte(strings.Join(msgs, "") + "\n"))
+		conn.Write([]byte(strings.Join(msgs, "\n") + "\n"))
 	}
-
-	BrodCast("\n"+name+" has joined our chat..."+"\n", conn)
+	if len(Clients) != 1 {
+		BrodCast(name+" has joined the chat...\n", conn)
+	} else {
+		conn.Write([]byte(fmt.Sprintf("[%s][%s]:", time.Now().Format(time.DateTime), name)))
+	}
 	for {
 		msg, err := read.ReadString('\n')
 		if err != nil {
-			BrodCast("\n"+name+" has left our chat...\n", conn)
 			break
 		}
 		if len(msg) == 1 {
@@ -64,10 +67,10 @@ func Connection(conn net.Conn, Logo []byte) {
 			continue
 		}
 		if !isPrintable(msg[:len(msg)-1]) {
-			conn.Write([]byte("you just entered in invalid text\n"))
+			conn.Write([]byte("you just entered an invalid text\n"))
 			conn.Write([]byte(fmt.Sprintf("[%s][%s]:", time.Now().Format(time.DateTime), Clients[conn])))
 			continue
 		}
-		BrodCast(fmt.Sprintf("\n[%s][%s]:%s", time.Now().Format(time.DateTime), Clients[conn], msg), conn)
+		BrodCast(fmt.Sprintf("[%s][%s]:%s", time.Now().Format(time.DateTime), Clients[conn], msg), conn)
 	}
 }
