@@ -45,5 +45,37 @@ func TestServerResponse(t *testing.T) {
 	if response != expected {
 		t.Errorf("Expected response %q, got %q", expected, response)
 	}
-	fmt.Println(response)
+	// fmt.Println(response)
 }
+
+// // logging
+// func main() {
+// 	// Open the log file with read/write, create if not exists, and append mode
+// 	f, err := os.OpenFile("log.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	defer f.Close() // Ensure the file is closed at the end
+
+// 	// Write a string to the file
+// 	_, err = f.WriteString("azer\n")
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+
+// 	// Log a message to the default logger
+// 	log.Print("rzs\n")
+// 	_, err = f.Seek(0, 0) // Seek to the beginning of the file
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+
+// 	// Read some bytes from the file
+// 	a := make([]byte, 1000)
+// 	_, err = f.Read(a)                          // Corrected the function call to Read
+// 	if err != nil && err != fmt.Errorf("EOF") { // Check for EOF separately
+// 		log.Fatal(err, a)
+// 	}
+
+// 	fmt.Println(string(a)) // Convert bytes to string for output
+// }
